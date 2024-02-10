@@ -1,0 +1,11 @@
+[package]
+name = "delegate-trait"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+syn = { version = "2", features = ["full"] }
+quote = "1"
+proc-macro2 = "1"
+delegate = "0.12"
+prettyplease = "0.2"
