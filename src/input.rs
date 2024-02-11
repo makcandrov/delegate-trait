@@ -12,8 +12,6 @@ use crate::trait_path::ItemTraitPath;
 pub fn parse_input<P: AsRef<Path>>(path: P) -> syn::Result<DelegateInput> {
     let file = read_to_string(path.as_ref()).unwrap();
 
-    dbg!(&file);
-
     let stream: TokenStream = file.parse().unwrap();
 
     parse2::<DelegateInput>(stream)
@@ -58,9 +56,7 @@ impl Parse for DelegateInput {
         let mut traits = Option::<Vec<ItemTraitPath>>::None;
 
         while !input.is_empty() {
-            dbg!("a");
             let ident = input.parse::<Ident>()?;
-            dbg!("x");
             input.parse::<Token![=]>()?;
             match ident.to_string().as_str() {
                 "crate_ident" => {
