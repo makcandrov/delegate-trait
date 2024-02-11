@@ -51,8 +51,18 @@ impl DynamicGenericRenamer {
                 });
             },
             Type::BareFn(_) => todo!(),
-            Type::Group(_) => todo!(),
-            Type::ImplTrait(_) => todo!(),
+            Type::Group(type_group) => {
+                type_group.group_token.surround(tokens, |tokens| {
+                    self.renamed_type(tokens, &type_group.elem);
+                });
+            },
+            Type::ImplTrait(impl_trait) => {
+                impl_trait.impl_token.to_tokens(tokens);
+                impl_trait.bounds.pairs().for_each(|pair| {
+                    self.renamed_type_param_bound(tokens, pair.value());
+                    pair.punct().to_tokens(tokens);
+                });
+            },
             Type::Infer(infer) => infer.to_tokens(tokens),
             Type::Macro(_) => todo!(),
             Type::Never(never) => never.to_tokens(tokens),
@@ -97,7 +107,16 @@ impl DynamicGenericRenamer {
                     segment.punct().to_tokens(tokens);
                 }
             },
-            Type::Ptr(_) => todo!(),
+            Type::Ptr(type_ptr) => {
+                type_ptr.star_token.to_tokens(tokens);
+                match &type_ptr.mutability {
+                    Some(tok) => tok.to_tokens(tokens),
+                    None => {
+                        type_ptr.const_token.unwrap_or_default().to_tokens(tokens);
+                    },
+                }
+                self.renamed_type(tokens, &type_ptr.elem);
+            },
             Type::Reference(reference) => {
                 reference.and_token.to_tokens(tokens);
                 reference
@@ -107,7 +126,11 @@ impl DynamicGenericRenamer {
                 reference.mutability.to_tokens(tokens);
                 self.renamed_type(tokens, &reference.elem);
             },
-            Type::Slice(_) => todo!(),
+            Type::Slice(type_slice) => {
+                type_slice.bracket_token.surround(tokens, |tokens| {
+                    self.renamed_type(tokens, &type_slice.elem);
+                });
+            },
             Type::TraitObject(trait_object) => self.renamed_type_trait_object(tokens, trait_object),
             Type::Tuple(tuple) => {
                 tuple.paren_token.surround(tokens, |tokens| {
