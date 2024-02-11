@@ -134,7 +134,10 @@ impl DynamicGenericRenamer {
             Type::TraitObject(trait_object) => self.renamed_type_trait_object(tokens, trait_object),
             Type::Tuple(tuple) => {
                 tuple.paren_token.surround(tokens, |tokens| {
-                    tuple.elems.iter().for_each(|ty| self.renamed_type(tokens, ty));
+                    tuple.elems.pairs().for_each(|pair| {
+                        self.renamed_type(tokens, pair.value());
+                        pair.punct().to_tokens(tokens);
+                    });
                     // If we only have one argument, we need a trailing comma to
                     // distinguish TypeTuple from TypeParen.
                     if tuple.elems.len() == 1 && !tuple.elems.trailing_punct() {
