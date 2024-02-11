@@ -6,7 +6,10 @@ pub use config::TraitConfig;
 mod context;
 pub use context::Context;
 
+mod dynamic_rename;
+
 mod generics;
+pub use generics::GenericIdent;
 
 mod input;
 pub use input::parse_input;

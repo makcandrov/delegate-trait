@@ -1,10 +1,14 @@
-use proc_macro2::TokenStream;
-use quote::quote;
-use syn::{FnArg, PatType, PathArguments, TraitItem, TraitItemFn};
+use std::collections::HashMap;
 
+use proc_macro2::{Span, TokenStream};
+use quote::quote;
+use syn::{FnArg, Ident, PatType, TraitItem, TraitItemFn};
+
+use crate::dynamic_rename::DynamicGenericRenamer;
 use crate::input::DelegateInput;
 use crate::prefixer::Prefixer;
 use crate::trait_path::ItemTraitPath;
+use crate::GenericIdent;
 
 pub fn generate_traits_match(input: &DelegateInput) -> TokenStream {
     let mut res = TokenStream::default();
@@ -24,15 +28,25 @@ fn generate_trait_impl(input: &DelegateInput, trait_input: &ItemTraitPath) -> To
         crates: input.deps.iter().map(|ident| ident.to_string()).collect(),
     };
 
+    let hashtag = quote! { # };
+
+    let mut generic_idents = HashMap::<GenericIdent, Ident>::new();
+    let mut generic_renames = TokenStream::default();
+
+    for (i, generic) in trait_input.generics.params.iter().enumerate() {
+        let rename_ident = Ident::new(&format!("generic_{i}"), Span::call_site());
+        generic_renames
+            .extend(quote! { let #rename_ident = ::delegate_trait::GenericIdent::from(&config.generics.params[#i]); });
+        generic_idents.insert(GenericIdent::from(generic), rename_ident);
+    }
+
+    let renamer = DynamicGenericRenamer::new(generic_idents);
+
     let mut trait_path = trait_input.path.clone();
-    // trait_path.segments.last_mut().unwrap().ident = config.ident.clone();
     prefixer.prefix_path(&mut trait_path);
 
     let mut trait_path_without_ident = trait_path.clone();
     trait_path_without_ident.segments.pop();
-
-    let mut trait_path_without_generic = trait_path.clone();
-    trait_path_without_generic.segments.last_mut().unwrap().arguments = PathArguments::None;
 
     let mut methods = TokenStream::default();
 
@@ -45,15 +59,18 @@ fn generate_trait_impl(input: &DelegateInput, trait_input: &ItemTraitPath) -> To
         method.default = None;
         method.semi_token = Some(Default::default());
 
+        let mut renamed_method = TokenStream::default();
+        renamer.renamed_trait_item_fn(&mut renamed_method, &method);
+
         methods.extend(quote! {
-            #[through(#trait_path_without_generic)]
-            #method
+            #[through(#trait_path)]
+            #renamed_method
         })
     }
 
-    let hashtag = quote! { # };
-
     quote! {
+        #generic_renames
+
         let to = &config.to;
         let wi = config.wi.clone().unwrap_or_default();
         let trait_ident = &config.ident;

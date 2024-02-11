@@ -1,9 +1,11 @@
 use std::collections::HashMap;
 
-use syn::{GenericParam, Generics, Ident, WhereClause};
+use proc_macro2::{Span, TokenStream};
+use quote::ToTokens;
+use syn::{GenericParam, Generics, Ident, Lifetime, WhereClause};
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
-enum GenericIdent {
+pub enum GenericIdent {
     Lifetime(Ident),
     Other(Ident),
 }
@@ -14,6 +16,19 @@ impl From<&GenericParam> for GenericIdent {
             GenericParam::Lifetime(l) => Self::Lifetime(l.lifetime.ident.clone()),
             GenericParam::Type(t) => Self::Other(t.ident.clone()),
             GenericParam::Const(c) => Self::Other(c.ident.clone().clone()),
+        }
+    }
+}
+
+impl ToTokens for GenericIdent {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        match self {
+            GenericIdent::Lifetime(l) => Lifetime {
+                apostrophe: Span::call_site(),
+                ident: l.clone(),
+            }
+            .to_tokens(tokens),
+            GenericIdent::Other(o) => o.to_tokens(tokens),
         }
     }
 }

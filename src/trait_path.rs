@@ -1,16 +1,19 @@
 //! Rewrite of `syn::ItemTrait` with a `Path` instead of an `Ident`.
 
+use quote::ToTokens;
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 use syn::{
     braced,
     bracketed,
+    parse2,
     token,
     AttrStyle,
     Attribute,
     Generics,
     ImplRestriction,
     Path,
+    PathArguments,
     Token,
     TraitItem,
     TypeParamBound,
@@ -39,8 +42,9 @@ impl Parse for ItemTraitPath {
         let unsafety: Option<Token![unsafe]> = input.parse()?;
         let auto_token: Option<Token![auto]> = input.parse()?;
         let trait_token: Token![trait] = input.parse()?;
-        let path: Path = input.parse()?;
-        let generics: Generics = input.parse()?;
+        let mut path: Path = input.parse()?;
+        let arguments = core::mem::replace(&mut path.segments.last_mut().unwrap().arguments, PathArguments::None);
+        let generics: Generics = parse2(arguments.to_token_stream())?;
         parse_rest_of_trait(
             input,
             outer_attrs,
