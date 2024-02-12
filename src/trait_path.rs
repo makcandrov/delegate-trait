@@ -43,7 +43,14 @@ impl Parse for ItemTraitPath {
         let auto_token: Option<Token![auto]> = input.parse()?;
         let trait_token: Token![trait] = input.parse()?;
         let mut path: Path = input.parse()?;
-        let arguments = core::mem::replace(&mut path.segments.last_mut().unwrap().arguments, PathArguments::None);
+        let arguments = core::mem::replace(
+            &mut path
+                .segments
+                .last_mut()
+                .expect("ItemTraitPath::parse: expected ident")
+                .arguments,
+            PathArguments::None,
+        );
         let generics: Generics = parse2(arguments.to_token_stream())?;
         parse_rest_of_trait(
             input,

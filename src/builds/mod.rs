@@ -11,11 +11,11 @@ macro_rules! build_delegate {
             println!("cargo:rerun-if-changed=./build.rs");
             println!("cargo:rerun-if-changed=./INPUT");
 
-            let out_dir = ::std::env::var_os("OUT_DIR").unwrap();
+            let out_dir = ::std::env::var_os("OUT_DIR").expect("Could not read en var `OUT_DIR`");
             let out_path = ::std::path::Path::new(&out_dir);
 
             let input = $crate::builds::generate_delegate_build_string("./INPUT");
-            ::std::fs::write(out_path.join("lib.rs"), input).unwrap();
+            ::std::fs::write(out_path.join("lib.rs"), input).expect("Could not write expanded macro.");
         }
     };
 }
@@ -27,11 +27,11 @@ macro_rules! build_delegate_impl {
             println!("cargo:rerun-if-changed=./build.rs");
             println!("cargo:rerun-if-changed=../INPUT");
 
-            let out_dir = ::std::env::var_os("OUT_DIR").unwrap();
+            let out_dir = ::std::env::var_os("OUT_DIR").expect("Could not read en var `OUT_DIR`");
             let out_path = ::std::path::Path::new(&out_dir);
 
             let input = $crate::builds::generate_delegate_impl_build_string("../INPUT");
-            ::std::fs::write(out_path.join("lib.rs"), input).unwrap();
+            ::std::fs::write(out_path.join("lib.rs"), input).expect("Could not write expanded macro.");
         }
     };
 }

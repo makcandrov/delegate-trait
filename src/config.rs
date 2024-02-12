@@ -1,13 +1,13 @@
 use proc_macro2::{Ident, TokenStream};
-use quote::quote;
+use quote::{quote, ToTokens};
 use syn::parse::Parse;
-use syn::{GenericParam, Generics, Token, WhereClause};
+use syn::{parse2, GenericParam, Generics, PathArguments, Token, WhereClause};
 
 use crate::generics::{merge_generics, merge_where_clauses};
 use crate::Context;
 
 pub struct TraitConfig {
-    pub ident: syn::Ident,
+    pub path: syn::Path,
     pub generics: syn::Generics,
     pub to: syn::Expr,
     pub wh: Option<WhereClause>,
@@ -63,8 +63,17 @@ mod keyword {
 
 impl Parse for TraitConfig {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
-        let ident = input.parse::<syn::Ident>()?;
-        let generics = input.parse::<syn::Generics>()?;
+        let mut path = input.parse::<syn::Path>()?;
+
+        let arguments = core::mem::replace(
+            &mut path
+                .segments
+                .last_mut()
+                .expect("TraitConfig::parse: Ident expected")
+                .arguments,
+            PathArguments::None,
+        );
+        let generics: Generics = parse2(arguments.to_token_stream())?;
 
         input.parse::<keyword::to>()?;
 
@@ -86,7 +95,7 @@ impl Parse for TraitConfig {
         };
 
         Ok(Self {
-            ident,
+            path,
             generics,
             to,
             wh,

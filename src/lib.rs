@@ -14,8 +14,6 @@ pub use generics::GenericIdent;
 mod input;
 pub use input::parse_input;
 
-pub mod prefixer;
-
 mod trait_path;
 
 mod trait_impl;

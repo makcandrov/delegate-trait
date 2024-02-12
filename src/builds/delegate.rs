@@ -9,18 +9,14 @@ use crate::parse_input;
 
 pub fn generate_delegate_build_string<P: AsRef<Path>>(path: P) -> String {
     match parse_input(path.as_ref()) {
-        Ok(input) => prettyplease::unparse(&parse2::<File>(generate_crate_build(&input)).unwrap()),
+        Ok(input) => {
+            prettyplease::unparse(&parse2::<File>(generate_crate_build(&input)).expect("prettyplease: unparse failed"))
+        },
         Err(err) => err.to_compile_error().to_string(),
     }
 }
 
 fn generate_crate_build(input: &DelegateInput) -> TokenStream {
-    let mut exports = TokenStream::new();
-
-    for dep in &input.deps {
-        exports.extend(quote! { pub use #dep; });
-    }
-
     let delegate_impl_ident = &input.crate_impl_ident;
 
     quote! {
@@ -29,8 +25,6 @@ fn generate_crate_build(input: &DelegateInput) -> TokenStream {
         #[doc(hidden)]
         pub mod __private {
             pub use delegate_trait::delegate;
-
-            #exports
         }
     }
 }

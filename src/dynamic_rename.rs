@@ -353,7 +353,7 @@ impl DynamicGenericRenamer {
 
     pub fn renamed_path(&self, tokens: &mut TokenStream, path: &Path) {
         if path.leading_colon.is_none() && path.segments.len() == 1 {
-            let segment = path.segments.first().unwrap();
+            let segment = path.segments.first().expect("renamed_path: expected non empty path");
             if segment.arguments.is_none() {
                 if let Some(ident) = self.renames.get(&GenericIdent::Other(segment.ident.clone())) {
                     let hashtag = quote! { # };

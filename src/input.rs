@@ -4,15 +4,15 @@ use std::path::Path;
 use proc_macro2::{Ident, Span, TokenStream};
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
-use syn::token::{Comma, PathSep};
-use syn::{braced, bracketed, parse2, PathArguments, PathSegment, Token};
+use syn::token::PathSep;
+use syn::{braced, parse2, PathArguments, PathSegment, Token};
 
 use crate::trait_path::ItemTraitPath;
 
 pub fn parse_input<P: AsRef<Path>>(path: P) -> syn::Result<DelegateInput> {
-    let file = read_to_string(path.as_ref()).unwrap();
+    let file = read_to_string(path.as_ref()).expect(&format!("Could not open {:?}", path.as_ref()));
 
-    let stream: TokenStream = file.parse().unwrap();
+    let stream = file.parse::<TokenStream>()?;
 
     parse2::<DelegateInput>(stream)
 }
@@ -22,7 +22,6 @@ pub struct DelegateInput {
     pub crate_impl_ident: Ident,
     pub macro_ident: Ident,
     pub macro_helper_ident: Ident,
-    pub deps: Vec<Ident>,
     pub traits: Vec<ItemTraitPath>,
 }
 
@@ -52,7 +51,6 @@ impl Parse for DelegateInput {
         let mut crate_impl_ident = Option::<Ident>::None;
         let mut macro_ident = Option::<Ident>::None;
         let mut macro_helper_ident = Option::<Ident>::None;
-        let mut deps = Option::<Vec<Ident>>::None;
         let mut traits = Option::<Vec<ItemTraitPath>>::None;
 
         while !input.is_empty() {
@@ -82,18 +80,6 @@ impl Parse for DelegateInput {
                         return Err(syn::Error::new_spanned(&ident, "Already specified."));
                     }
                     macro_helper_ident.replace(input.parse::<Ident>()?);
-                },
-                "dependencies" => {
-                    if deps.is_some() {
-                        return Err(syn::Error::new_spanned(&ident, "Already specified."));
-                    }
-                    let content;
-                    bracketed!(content in input);
-                    deps.replace(
-                        Punctuated::<Ident, Comma>::parse_terminated(&content)?
-                            .into_iter()
-                            .collect(),
-                    );
                 },
                 "traits" => {
                     if traits.is_some() {
@@ -131,7 +117,6 @@ impl Parse for DelegateInput {
                 Span::call_site(),
                 "No item `macro_helper_ident` specified.",
             ))?,
-            deps: deps.unwrap_or_default(),
             traits: traits.ok_or(syn::Error::new(Span::call_site(), "No item `trait` specified."))?,
         })
     }

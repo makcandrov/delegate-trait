@@ -9,7 +9,9 @@ use crate::{generate_traits_match, parse_input};
 
 pub fn generate_delegate_impl_build_string<P: AsRef<Path>>(path: P) -> String {
     match parse_input(path.as_ref()) {
-        Ok(input) => prettyplease::unparse(&parse2::<File>(generate_crate_impl_build(&input)).unwrap()),
+        Ok(input) => prettyplease::unparse(
+            &parse2::<File>(generate_crate_impl_build(&input)).expect("prettyplease: unparse failed"),
+        ),
         // Ok(input) => generate_crate_impl_build(&input).to_string(),
         Err(err) => err.to_compile_error().to_string(),
     }
@@ -46,9 +48,12 @@ fn generate_crate_impl_build(input: &DelegateInput) -> TokenStream {
                 let list = attr.meta.require_list()?;
                 let config = list.parse_args::<::delegate_trait::TraitConfig>()?;
 
-                let trait_implem: ::proc_macro2::TokenStream = match config.ident.to_string().as_str() {
+                let trait_ident = &config.path.segments.last().expect("try_expand: Ident expected").ident;
+                let trait_ident_string = trait_ident.to_string();
+
+                let trait_implem: ::proc_macro2::TokenStream = match trait_ident_string.as_str() {
                     #traits_match
-                    _ => return Err(syn::Error::new_spanned(&config.ident, &format!("Unknown trait {}.", config.ident.to_string()))),
+                    _ => return Err(syn::Error::new_spanned(trait_ident, &format!("Unknown trait {}.", trait_ident_string))),
                 };
 
                 res.extend(trait_implem);
