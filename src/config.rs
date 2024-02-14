@@ -38,7 +38,7 @@ impl TraitConfig {
         trait_generics: &Generics,
         methods: &TokenStream,
     ) -> TokenStream {
-        let ty_generics = &context.generics;
+        let (_, ty_generics, _) = context.generics.split_for_impl();
 
         let mut impl_generics = context.generics.clone();
         merge_generics(&mut impl_generics, &self.generics);
