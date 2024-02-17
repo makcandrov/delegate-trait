@@ -24,6 +24,7 @@ fn generate_crate_impl_build(input: &DelegateInput) -> TokenStream {
 
     let hashtag = quote! { # };
     quote! {
+        #[doc(hidden)]
         #[proc_macro_attribute]
         pub fn #macro_ident (args: ::proc_macro::TokenStream, input: ::proc_macro::TokenStream) -> ::proc_macro::TokenStream {
             let args = ::syn::parse_macro_input!(args as ::delegate_trait::TraitConfig);

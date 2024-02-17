@@ -18,9 +18,10 @@ pub fn generate_delegate_build_string<P: AsRef<Path>>(path: P) -> String {
 
 fn generate_crate_build(input: &DelegateInput) -> TokenStream {
     let delegate_impl_ident = &input.crate_impl_ident;
+    let macro_ident = &input.macro_ident;
 
     quote! {
-        pub use #delegate_impl_ident::*;
+        pub use #delegate_impl_ident:: #macro_ident;
 
         #[doc(hidden)]
         pub mod __private {
