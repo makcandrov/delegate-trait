@@ -21,7 +21,6 @@ pub struct DelegateInput {
     pub crate_ident: Ident,
     pub crate_impl_ident: Ident,
     pub macro_ident: Ident,
-    pub macro_helper_ident: Ident,
     pub traits: Vec<ItemTraitPath>,
 }
 
@@ -50,7 +49,6 @@ impl Parse for DelegateInput {
         let mut crate_ident = Option::<Ident>::None;
         let mut crate_impl_ident = Option::<Ident>::None;
         let mut macro_ident = Option::<Ident>::None;
-        let mut macro_helper_ident = Option::<Ident>::None;
         let mut traits = Option::<Vec<ItemTraitPath>>::None;
 
         while !input.is_empty() {
@@ -74,12 +72,6 @@ impl Parse for DelegateInput {
                         return Err(syn::Error::new_spanned(&ident, "Already specified."));
                     }
                     macro_ident.replace(input.parse::<Ident>()?);
-                },
-                "macro_helper_ident" => {
-                    if macro_helper_ident.is_some() {
-                        return Err(syn::Error::new_spanned(&ident, "Already specified."));
-                    }
-                    macro_helper_ident.replace(input.parse::<Ident>()?);
                 },
                 "traits" => {
                     if traits.is_some() {
@@ -113,10 +105,6 @@ impl Parse for DelegateInput {
                 "No item `cate_impl_ident` specified.",
             ))?,
             macro_ident: macro_ident.ok_or(syn::Error::new(Span::call_site(), "No item `macro_ident` specified."))?,
-            macro_helper_ident: macro_helper_ident.ok_or(syn::Error::new(
-                Span::call_site(),
-                "No item `macro_helper_ident` specified.",
-            ))?,
             traits: traits.ok_or(syn::Error::new(Span::call_site(), "No item `trait` specified."))?,
         })
     }
