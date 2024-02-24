@@ -1,5 +1,6 @@
 use super::{LookupTokenModifier, TokenModifier};
 
+#[derive(Debug, Clone)]
 pub struct PathRootRenamer {
     pub original: String,
     pub rename: syn::Ident,
@@ -7,7 +8,7 @@ pub struct PathRootRenamer {
 }
 
 impl TokenModifier for PathRootRenamer {
-    fn modify_path(&self, item: &mut syn::Path) {
+    fn modify_path(&mut self, item: &mut syn::Path) {
         if item.segments.len() > 1 {
             let first = item.segments.first_mut().unwrap();
             if first.ident.to_string() == self.original {
