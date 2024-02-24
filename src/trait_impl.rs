@@ -37,7 +37,7 @@ pub fn generate_trait_impl(
 ) -> syn::Result<TokenStream> {
     if let Ok(package_name) = std::env::var("CARGO_PKG_NAME") {
         let mut renamer = PathRootRenamer {
-            original: package_name,
+            original: package_name.replace("-", "_"),
             rename: Ident::new("crate", Span::call_site()),
             remove_leading_colon: true,
         };
