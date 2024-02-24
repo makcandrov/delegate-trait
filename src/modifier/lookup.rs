@@ -83,6 +83,7 @@ impl<'a, T: TokenModifier> TokenModifier for LookupTokenModifier<'a, T> {
     }
 
     fn modify_path_segment(&self, item: &mut syn::PathSegment) {
+        self.0.modify_ident(&mut item.ident);
         self.0.modify_path_arguments(&mut item.arguments);
     }
 
@@ -191,5 +192,38 @@ impl<'a, T: TokenModifier> TokenModifier for LookupTokenModifier<'a, T> {
         item.lifetimes
             .as_mut()
             .map(|lifetimes| self.0.modify_bound_lifetimes(lifetimes));
+    }
+
+    fn modify_item_trait_path(&self, item: &mut crate::ItemTraitPath) {
+        self.0.modify_path(&mut item.path);
+        self.0.modify_generics(&mut item.generics);
+        item.items
+            .iter_mut()
+            .for_each(|trait_item| self.0.modify_trait_item(trait_item));
+    }
+
+    fn modify_trait_item(&self, item: &mut syn::TraitItem) {
+        match item {
+            syn::TraitItem::Const(trait_item_const) => self.0.modify_trait_item_const(trait_item_const),
+            syn::TraitItem::Fn(trait_item_fn) => self.0.modify_trait_item_fn(trait_item_fn),
+            syn::TraitItem::Type(trait_item_type) => self.0.modify_trait_item_type(trait_item_type),
+            _ => (),
+        }
+    }
+
+    fn modify_trait_item_type(&self, item: &mut syn::TraitItemType) {
+        self.0.modify_ident(&mut item.ident);
+        self.0.modify_generics(&mut item.generics);
+        item.bounds
+            .iter_mut()
+            .for_each(|bound| self.0.modify_type_param_bound(bound));
+        item.default.as_mut().map(|(_, default)| self.0.modify_type(default));
+    }
+
+    fn modify_trait_item_const(&self, item: &mut syn::TraitItemConst) {
+        self.0.modify_ident(&mut item.ident);
+        self.0.modify_generics(&mut item.generics);
+        self.0.modify_type(&mut item.ty);
+        // todo: default
     }
 }

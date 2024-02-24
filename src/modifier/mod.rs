@@ -128,4 +128,20 @@ pub trait TokenModifier: Sized {
     fn modify_trait_bound(&self, item: &mut syn::TraitBound) {
         LookupTokenModifier(self).modify_trait_bound(item)
     }
+
+    fn modify_item_trait_path(&self, item: &mut crate::ItemTraitPath) {
+        LookupTokenModifier(self).modify_item_trait_path(item)
+    }
+
+    fn modify_trait_item(&self, item: &mut syn::TraitItem) {
+        LookupTokenModifier(self).modify_trait_item(item)
+    }
+
+    fn modify_trait_item_type(&self, item: &mut syn::TraitItemType) {
+        LookupTokenModifier(self).modify_trait_item_type(item)
+    }
+
+    fn modify_trait_item_const(&self, item: &mut syn::TraitItemConst) {
+        LookupTokenModifier(self).modify_trait_item_const(item)
+    }
 }

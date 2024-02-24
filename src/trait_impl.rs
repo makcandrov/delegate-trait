@@ -23,7 +23,7 @@ pub fn generate_traits_match(input: &DelegateInput) -> TokenStream {
             .to_string();
         let trait_impl = quote! {
             let trait_input = ::syn::parse2::<::delegate_trait::ItemTraitPath>(::quote::quote! { #trait_input }).unwrap();
-            let root = ::syn::parse2::<syn::Path>(::quote::quote! { #root }).unwrap();
+            let root = ::syn::parse2::<::syn::Path>(::quote::quote! { #root }).unwrap();
             ::delegate_trait::generate_trait_impl(&context, config, root, trait_input)
         };
         res.extend(quote! { #trait_ident_string => { #trait_impl }, });
@@ -35,8 +35,17 @@ pub fn generate_trait_impl(
     context: &Context<'_>,
     config: &TraitConfig,
     root: Path,
-    trait_input: ItemTraitPath,
+    mut trait_input: ItemTraitPath,
 ) -> TokenStream {
+    if let Ok(package_name) = std::env::var("CARGO_PKG_NAME") {
+        let renamer = PathRootRenamer {
+            original: package_name,
+            rename: Ident::new("crate", Span::call_site()),
+            remove_leading_colon: true,
+        };
+        renamer.modify_item_trait_path(&mut trait_input);
+    }
+
     // let hashtag = quote! { # };
 
     // let mut generic_idents = HashMap::<GenericIdent, Ident>::new();
@@ -51,16 +60,7 @@ pub fn generate_trait_impl(
 
     // let renamer = DynamicGenericRenamer::new(generic_idents);
 
-    let mut trait_path = trait_input.path.clone();
-
-    if let Ok(package_name) = std::env::var("CARGO_PKG_NAME") {
-        let renamer = PathRootRenamer {
-            original: package_name,
-            rename: Ident::new("crate", Span::call_site()),
-            remove_leading_colon: true,
-        };
-        renamer.modify_path(&mut trait_path);
-    }
+    let trait_path = trait_input.path.clone();
 
     let mut trait_path_without_ident = trait_path.clone();
     trait_path_without_ident.segments.pop();
@@ -74,15 +74,6 @@ pub fn generate_trait_impl(
 
         method.default = None;
         method.semi_token = Some(Default::default());
-
-        if let Ok(package_name) = std::env::var("CARGO_PKG_NAME") {
-            let renamer = PathRootRenamer {
-                original: package_name,
-                rename: Ident::new("crate", Span::call_site()),
-                remove_leading_colon: true,
-            };
-            renamer.modify_trait_item_fn(&mut method);
-        }
 
         // let mut renamed_method = TokenStream::default();
         // renamer.renamed_trait_item_fn(&mut renamed_method, &method);
