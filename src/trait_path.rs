@@ -1,6 +1,6 @@
 //! Rewrite of `syn::ItemTrait` with a `Path` instead of an `Ident`.
 
-use quote::ToTokens;
+use quote::{ToTokens, TokenStreamExt};
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 use syn::{
@@ -132,4 +132,23 @@ fn single_parse_inner(input: ParseStream) -> syn::Result<Attribute> {
         bracket_token: bracketed!(content in input),
         meta: content.parse()?,
     })
+}
+
+impl ToTokens for ItemTraitPath {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        self.vis.to_tokens(tokens);
+        self.unsafety.to_tokens(tokens);
+        self.auto_token.to_tokens(tokens);
+        self.trait_token.to_tokens(tokens);
+        self.path.to_tokens(tokens);
+        self.generics.to_tokens(tokens);
+        if !self.supertraits.is_empty() {
+            self.colon_token.clone().unwrap_or_default().to_tokens(tokens);
+            self.supertraits.to_tokens(tokens);
+        }
+        self.generics.where_clause.to_tokens(tokens);
+        self.brace_token.surround(tokens, |tokens| {
+            tokens.append_all(&self.items);
+        });
+    }
 }
