@@ -1,14 +1,12 @@
-use std::collections::HashMap;
-
 use proc_macro2::{Span, TokenStream};
-use quote::quote;
-use syn::{Ident, Path, TraitItem, TraitItemFn};
+use quote::{quote, ToTokens};
+use syn::{GenericParam, Ident, Path, TraitItem, TraitItemFn};
 
-use crate::dynamic_rename::DynamicGenericRenamer;
+use crate::generics::generic_param_name;
 use crate::input::DelegateInput;
-use crate::modifier::{PathRootRenamer, TokenModifier};
+use crate::modifier::{GenericsRenamer, PathRootRenamer, TokenModifier};
 use crate::trait_path::ItemTraitPath;
-use crate::{Context, GenericIdent, TraitConfig};
+use crate::{Context, TraitConfig};
 
 pub fn generate_traits_match(input: &DelegateInput) -> TokenStream {
     let mut res = TokenStream::default();
@@ -24,7 +22,7 @@ pub fn generate_traits_match(input: &DelegateInput) -> TokenStream {
         let trait_impl = quote! {
             let trait_input = ::syn::parse2::<::delegate_trait::ItemTraitPath>(::quote::quote! { #trait_input }).unwrap();
             let root = ::syn::parse2::<::syn::Path>(::quote::quote! { #root }).unwrap();
-            ::delegate_trait::generate_trait_impl(&context, config, root, trait_input)
+            ::delegate_trait::generate_trait_impl(&context, config, root, trait_input)?
         };
         res.extend(quote! { #trait_ident_string => { #trait_impl }, });
     }
@@ -36,7 +34,7 @@ pub fn generate_trait_impl(
     config: &TraitConfig,
     root: Path,
     mut trait_input: ItemTraitPath,
-) -> TokenStream {
+) -> syn::Result<TokenStream> {
     if let Ok(package_name) = std::env::var("CARGO_PKG_NAME") {
         let mut renamer = PathRootRenamer {
             original: package_name,
@@ -46,19 +44,31 @@ pub fn generate_trait_impl(
         renamer.modify_item_trait_path(&mut trait_input);
     }
 
-    // let hashtag = quote! { # };
+    let mut generics_renamer = GenericsRenamer::default();
 
-    // let mut generic_idents = HashMap::<GenericIdent, Ident>::new();
-    // let mut generic_renames = TokenStream::default();
-
-    // for (i, generic) in trait_input.generics.params.iter().enumerate() {
-    //     let rename_ident = Ident::new(&format!("generic_{i}"), Span::call_site());
-    //     generic_renames
-    //         .extend(quote! { let #rename_ident = ::delegate_trait::GenericIdent::from(&config.generics.params[#i]); });
-    //     generic_idents.insert(GenericIdent::from(generic), rename_ident);
-    // }
-
-    // let renamer = DynamicGenericRenamer::new(generic_idents);
+    for couple in trait_input.generics.params.iter().zip(config.generics.params.iter()) {
+        match couple {
+            (GenericParam::Lifetime(original), GenericParam::Lifetime(renamed)) => {
+                generics_renamer.insert_lifetime(original.lifetime.ident.to_string(), renamed.lifetime.ident.clone())
+            },
+            (GenericParam::Type(original), GenericParam::Type(renamed)) => {
+                generics_renamer.insert_type(original.ident.to_string(), renamed.ident.clone())
+            },
+            (GenericParam::Const(original), GenericParam::Const(renamed)) => {
+                generics_renamer.insert_type(original.ident.to_string(), renamed.ident.clone())
+            },
+            _ => {
+                return Err(syn::Error::new_spanned(
+                    &couple.1,
+                    &format!(
+                        "Expected {}, got {}.",
+                        generic_param_name(&couple.0),
+                        generic_param_name(&couple.1)
+                    ),
+                ))
+            },
+        }
+    }
 
     let trait_path = trait_input.path.clone();
 
@@ -75,16 +85,13 @@ pub fn generate_trait_impl(
         method.default = None;
         method.semi_token = Some(Default::default());
 
-        // let mut renamed_method = TokenStream::default();
-        // renamer.renamed_trait_item_fn(&mut renamed_method, &method);
+        generics_renamer.modify_trait_item_fn(&mut method);
 
         methods.extend(quote! {
             #[through(#trait_path)]
             #method
         })
     }
-
-    // #generic_renames
 
     let to = &config.to;
     let wi = config.wi.clone().unwrap_or_default();
@@ -100,12 +107,7 @@ pub fn generate_trait_impl(
         }
     };
 
-    config.wrap_methods(
-        &context,
-        &::quote::ToTokens::to_token_stream(&trait_path),
-        &config.generics,
-        &methods,
-    )
+    Ok(config.wrap_methods(&context, &trait_path.to_token_stream(), &config.generics, &methods))
 }
 
 fn trait_item_as_fn(trait_item: &TraitItem) -> Option<&TraitItemFn> {

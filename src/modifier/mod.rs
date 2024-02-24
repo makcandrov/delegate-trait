@@ -1,5 +1,5 @@
-mod generic_rename;
-pub use generic_rename::GenericRenamer;
+mod generics_rename;
+pub use generics_rename::GenericsRenamer;
 
 mod lookup;
 pub use lookup::LookupTokenModifier;

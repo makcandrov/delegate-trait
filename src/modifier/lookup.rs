@@ -105,7 +105,9 @@ impl<'a, T: TokenModifier> TokenModifier for LookupTokenModifier<'a, T> {
         self.0.modify_type(&mut item.elem)
     }
 
-    fn modify_lifetime(&mut self, _item: &mut syn::Lifetime) {}
+    fn modify_lifetime(&mut self, item: &mut syn::Lifetime) {
+        self.0.modify_ident(&mut item.ident)
+    }
 
     fn modify_generic_param(&mut self, item: &mut syn::GenericParam) {
         match item {

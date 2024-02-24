@@ -6,8 +6,6 @@ pub use config::TraitConfig;
 mod context;
 pub use context::Context;
 
-mod dynamic_rename;
-
 mod modifier;
 
 mod generics;
