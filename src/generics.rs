@@ -4,6 +4,14 @@ use proc_macro2::{Span, TokenStream};
 use quote::ToTokens;
 use syn::{GenericParam, Generics, Ident, Lifetime, WhereClause};
 
+pub fn generic_param_name(generic_param: &GenericParam) -> &'static str {
+    match generic_param {
+        GenericParam::Lifetime(_) => "lifetime",
+        GenericParam::Type(_) => "type",
+        GenericParam::Const(_) => "const",
+    }
+}
+
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub enum GenericIdent {
     Lifetime(Ident),
