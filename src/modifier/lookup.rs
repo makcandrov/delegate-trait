@@ -31,15 +31,15 @@ impl<'a, T: TokenModifier> TokenModifier for LookupTokenModifier<'a, T> {
             syn::Type::Array(type_array) => self.0.modify_type_array(type_array),
             syn::Type::BareFn(type_bare_fn) => self.0.modify_type_bare_fn(type_bare_fn),
             syn::Type::Group(type_group) => self.0.modify_type_group(type_group),
-            syn::Type::ImplTrait(_) => todo!(),
+            syn::Type::ImplTrait(type_impl_trait) => self.0.modify_type_impl_trait(type_impl_trait),
             syn::Type::Infer(_) => todo!(),
             syn::Type::Macro(_) => todo!(),
             syn::Type::Never(_) => todo!(),
             syn::Type::Paren(_) => todo!(),
             syn::Type::Path(type_path) => self.0.modify_type_path(type_path),
-            syn::Type::Ptr(_) => todo!(),
+            syn::Type::Ptr(type_ptr) => self.0.modify_type_ptr(type_ptr),
             syn::Type::Reference(type_reference) => self.0.modify_type_reference(type_reference),
-            syn::Type::Slice(_) => todo!(),
+            syn::Type::Slice(type_slice) => self.0.modify_type_slice(type_slice),
             syn::Type::TraitObject(_) => todo!(),
             syn::Type::Tuple(type_tuple) => self.0.modify_type_tuple(type_tuple),
             syn::Type::Verbatim(_) => (),
@@ -236,5 +236,19 @@ impl<'a, T: TokenModifier> TokenModifier for LookupTokenModifier<'a, T> {
             .as_mut()
             .map(|generics| self.0.modify_angle_bracketed_generic_argument(generics));
         self.0.modify_type(&mut item.ty);
+    }
+
+    fn modify_type_impl_trait(&mut self, item: &mut syn::TypeImplTrait) {
+        item.bounds
+            .iter_mut()
+            .for_each(|bound| self.0.modify_type_param_bound(bound));
+    }
+
+    fn modify_type_ptr(&mut self, item: &mut syn::TypePtr) {
+        self.0.modify_type(&mut item.elem)
+    }
+
+    fn modify_type_slice(&mut self, item: &mut syn::TypeSlice) {
+        self.0.modify_type(&mut item.elem)
     }
 }

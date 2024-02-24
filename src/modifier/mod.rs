@@ -151,4 +151,16 @@ pub trait TokenModifier: Sized {
     fn modify_assoc_type(&mut self, item: &mut syn::AssocType) {
         LookupTokenModifier(self).modify_assoc_type(item)
     }
+
+    fn modify_type_impl_trait(&mut self, item: &mut syn::TypeImplTrait) {
+        LookupTokenModifier(self).modify_type_impl_trait(item)
+    }
+
+    fn modify_type_ptr(&mut self, item: &mut syn::TypePtr) {
+        LookupTokenModifier(self).modify_type_ptr(item)
+    }
+
+    fn modify_type_slice(&mut self, item: &mut syn::TypeSlice) {
+        LookupTokenModifier(self).modify_type_slice(item)
+    }
 }
