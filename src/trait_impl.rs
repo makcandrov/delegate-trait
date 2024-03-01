@@ -1,6 +1,6 @@
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, ToTokens};
-use syn::{GenericParam, Ident, Path, PathArguments, TraitItem, TraitItemFn};
+use syn::{GenericParam, Ident, Path, TraitItem, TraitItemFn};
 
 use crate::generics::generic_param_name;
 use crate::input::DelegateInput;
@@ -70,10 +70,13 @@ pub fn generate_trait_impl(
         }
     }
 
-    let mut through_trait = config.path.clone();
-    if let PathArguments::AngleBracketed(args) = &mut through_trait.segments.last_mut().unwrap().arguments {
-        args.colon2_token = Some(Default::default());
-    }
+    let trait_path = &config.path;
+    let through_trait = if config.generics.params.is_empty() {
+        quote! { #trait_path }
+    } else {
+        let generics = &config.generics;
+        quote! { #trait_path :: #generics }
+    };
 
     let mut methods = TokenStream::default();
 
@@ -106,7 +109,7 @@ pub fn generate_trait_impl(
         }
     };
 
-    Ok(config.wrap_methods(&context, &config.path.to_token_stream(), &config.generics, &methods))
+    Ok(config.wrap_methods(&context, &trait_path.to_token_stream(), &config.generics, &methods))
 }
 
 fn trait_item_as_fn(trait_item: &TraitItem) -> Option<&TraitItemFn> {
