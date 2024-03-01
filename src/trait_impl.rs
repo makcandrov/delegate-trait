@@ -70,11 +70,6 @@ pub fn generate_trait_impl(
         }
     }
 
-    let trait_path = trait_input.path.clone();
-
-    let mut trait_path_without_ident = trait_path.clone();
-    trait_path_without_ident.segments.pop();
-
     let mut methods = TokenStream::default();
 
     let trait_input_items = &trait_input.items;
@@ -88,14 +83,12 @@ pub fn generate_trait_impl(
         generics_renamer.modify_trait_item_fn(&mut method);
 
         methods.extend(quote! {
-            #[through(#trait_path)]
             #method
         })
     }
 
     let to = &config.to;
     let wi = config.wi.clone().unwrap_or_default();
-    let trait_path = &config.path;
 
     let methods = ::quote::quote! {
         #wi
@@ -107,7 +100,7 @@ pub fn generate_trait_impl(
         }
     };
 
-    Ok(config.wrap_methods(&context, &trait_path.to_token_stream(), &config.generics, &methods))
+    Ok(config.wrap_methods(&context, &config.path.to_token_stream(), &config.generics, &methods))
 }
 
 fn trait_item_as_fn(trait_item: &TraitItem) -> Option<&TraitItemFn> {
