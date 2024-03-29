@@ -87,6 +87,7 @@ pub fn generate_trait_impl(
 
         method.default = None;
         method.semi_token = Some(Default::default());
+        method.sig.ident.set_span(Span::call_site());
 
         generics_renamer.modify_trait_item_fn(&mut method);
 
