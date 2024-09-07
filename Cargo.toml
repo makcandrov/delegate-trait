@@ -7,5 +7,5 @@ edition = "2021"
 syn = { version = "2", features = ["full"] }
 quote = "1"
 proc-macro2 = "1"
-delegate = "0.12"
+delegate = "0.13"
 prettyplease = "0.2"
