@@ -10,7 +10,8 @@ use crate::{generate_traits_match, parse_input};
 pub fn generate_delegate_impl_build_string<P: AsRef<Path>>(path: P) -> String {
     match parse_input(path.as_ref()) {
         Ok(input) => prettyplease::unparse(
-            &parse2::<File>(generate_crate_impl_build(&input)).expect("prettyplease: unparse failed"),
+            &parse2::<File>(generate_crate_impl_build(&input))
+                .expect("prettyplease: unparse failed"),
         ),
         // Ok(input) => generate_crate_impl_build(&input).to_string(),
         Err(err) => err.to_compile_error().to_string(),

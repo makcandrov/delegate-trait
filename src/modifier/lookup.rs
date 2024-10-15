@@ -11,7 +11,9 @@ impl<'a, T: TokenModifier> TokenModifier for LookupTokenModifier<'a, T> {
     fn modify_signature(&mut self, item: &mut syn::Signature) {
         self.0.modify_ident(&mut item.ident);
         self.0.modify_generics(&mut item.generics);
-        item.inputs.iter_mut().for_each(|input| self.0.modify_fn_arg(input));
+        item.inputs
+            .iter_mut()
+            .for_each(|input| self.0.modify_fn_arg(input));
         self.0.modify_return_type(&mut item.output)
     }
 
@@ -68,7 +70,9 @@ impl<'a, T: TokenModifier> TokenModifier for LookupTokenModifier<'a, T> {
     }
 
     fn modify_bare_fn_arg(&mut self, item: &mut syn::BareFnArg) {
-        item.name.as_mut().map(|(ident, _)| self.0.modify_ident(ident));
+        item.name
+            .as_mut()
+            .map(|(ident, _)| self.0.modify_ident(ident));
         self.0.modify_type(&mut item.ty)
     }
 
@@ -90,18 +94,26 @@ impl<'a, T: TokenModifier> TokenModifier for LookupTokenModifier<'a, T> {
 
     fn modify_path_arguments(&mut self, item: &mut syn::PathArguments) {
         match item {
-            syn::PathArguments::AngleBracketed(arg) => self.0.modify_angle_bracketed_generic_argument(arg),
-            syn::PathArguments::Parenthesized(arg) => self.0.modify_angle_parenthesized_generic_argument(arg),
+            syn::PathArguments::AngleBracketed(arg) => {
+                self.0.modify_angle_bracketed_generic_argument(arg)
+            }
+            syn::PathArguments::Parenthesized(arg) => {
+                self.0.modify_angle_parenthesized_generic_argument(arg)
+            }
             _ => (),
         }
     }
 
     fn modify_type_tuple(&mut self, item: &mut syn::TypeTuple) {
-        item.elems.iter_mut().for_each(|elem| self.0.modify_type(elem))
+        item.elems
+            .iter_mut()
+            .for_each(|elem| self.0.modify_type(elem))
     }
 
     fn modify_type_reference(&mut self, item: &mut syn::TypeReference) {
-        item.lifetime.as_mut().map(|lifetime| self.0.modify_lifetime(lifetime));
+        item.lifetime
+            .as_mut()
+            .map(|lifetime| self.0.modify_lifetime(lifetime));
         self.0.modify_type(&mut item.elem)
     }
 
@@ -111,7 +123,9 @@ impl<'a, T: TokenModifier> TokenModifier for LookupTokenModifier<'a, T> {
 
     fn modify_generic_param(&mut self, item: &mut syn::GenericParam) {
         match item {
-            syn::GenericParam::Lifetime(lifetime_param) => self.0.modify_lifetime_param(lifetime_param),
+            syn::GenericParam::Lifetime(lifetime_param) => {
+                self.0.modify_lifetime_param(lifetime_param)
+            }
             syn::GenericParam::Type(type_param) => self.0.modify_type_param(type_param),
             syn::GenericParam::Const(const_param) => self.0.modify_const_param(const_param),
         }
@@ -119,7 +133,9 @@ impl<'a, T: TokenModifier> TokenModifier for LookupTokenModifier<'a, T> {
 
     fn modify_lifetime_param(&mut self, item: &mut syn::LifetimeParam) {
         self.0.modify_lifetime(&mut item.lifetime);
-        item.bounds.iter_mut().for_each(|bound| self.0.modify_lifetime(bound));
+        item.bounds
+            .iter_mut()
+            .for_each(|bound| self.0.modify_lifetime(bound));
     }
 
     fn modify_type_param(&mut self, item: &mut syn::TypeParam) {
@@ -137,12 +153,22 @@ impl<'a, T: TokenModifier> TokenModifier for LookupTokenModifier<'a, T> {
         self.0.modify_type(&mut item.ty)
     }
 
-    fn modify_angle_bracketed_generic_argument(&mut self, item: &mut syn::AngleBracketedGenericArguments) {
-        item.args.iter_mut().for_each(|arg| self.0.modify_generic_argument(arg))
+    fn modify_angle_bracketed_generic_argument(
+        &mut self,
+        item: &mut syn::AngleBracketedGenericArguments,
+    ) {
+        item.args
+            .iter_mut()
+            .for_each(|arg| self.0.modify_generic_argument(arg))
     }
 
-    fn modify_angle_parenthesized_generic_argument(&mut self, item: &mut syn::ParenthesizedGenericArguments) {
-        item.inputs.iter_mut().for_each(|input| self.0.modify_type(input));
+    fn modify_angle_parenthesized_generic_argument(
+        &mut self,
+        item: &mut syn::ParenthesizedGenericArguments,
+    ) {
+        item.inputs
+            .iter_mut()
+            .for_each(|input| self.0.modify_type(input));
         self.0.modify_return_type(&mut item.output);
     }
 
@@ -207,7 +233,9 @@ impl<'a, T: TokenModifier> TokenModifier for LookupTokenModifier<'a, T> {
 
     fn modify_trait_item(&mut self, item: &mut syn::TraitItem) {
         match item {
-            syn::TraitItem::Const(trait_item_const) => self.0.modify_trait_item_const(trait_item_const),
+            syn::TraitItem::Const(trait_item_const) => {
+                self.0.modify_trait_item_const(trait_item_const)
+            }
             syn::TraitItem::Fn(trait_item_fn) => self.0.modify_trait_item_fn(trait_item_fn),
             syn::TraitItem::Type(trait_item_type) => self.0.modify_trait_item_type(trait_item_type),
             _ => (),
@@ -220,7 +248,9 @@ impl<'a, T: TokenModifier> TokenModifier for LookupTokenModifier<'a, T> {
         item.bounds
             .iter_mut()
             .for_each(|bound| self.0.modify_type_param_bound(bound));
-        item.default.as_mut().map(|(_, default)| self.0.modify_type(default));
+        item.default
+            .as_mut()
+            .map(|(_, default)| self.0.modify_type(default));
     }
 
     fn modify_trait_item_const(&mut self, item: &mut syn::TraitItemConst) {

@@ -60,19 +60,19 @@ impl Parse for DelegateInput {
                         return Err(syn::Error::new_spanned(&ident, "Already specified."));
                     }
                     crate_ident.replace(input.parse::<Ident>()?);
-                },
+                }
                 "crate_impl_ident" => {
                     if crate_impl_ident.is_some() {
                         return Err(syn::Error::new_spanned(&ident, "Already specified."));
                     }
                     crate_impl_ident.replace(input.parse::<Ident>()?);
-                },
+                }
                 "macro_ident" => {
                     if macro_ident.is_some() {
                         return Err(syn::Error::new_spanned(&ident, "Already specified."));
                     }
                     macro_ident.replace(input.parse::<Ident>()?);
-                },
+                }
                 "traits" => {
                     if traits.is_some() {
                         return Err(syn::Error::new_spanned(&ident, "Already specified."));
@@ -84,13 +84,13 @@ impl Parse for DelegateInput {
                         result.push(content.parse::<ItemTraitPath>()?);
                     }
                     traits.replace(result);
-                },
+                }
                 _ => {
                     return Err(syn::Error::new_spanned(
                         &ident,
                         &format!("Unknown identifier {}.", ident.to_string()),
                     ))
-                },
+                }
             }
             input.parse::<Token![;]>()?;
         }
@@ -104,8 +104,14 @@ impl Parse for DelegateInput {
                 Span::call_site(),
                 "No item `cate_impl_ident` specified.",
             ))?,
-            macro_ident: macro_ident.ok_or(syn::Error::new(Span::call_site(), "No item `macro_ident` specified."))?,
-            traits: traits.ok_or(syn::Error::new(Span::call_site(), "No item `trait` specified."))?,
+            macro_ident: macro_ident.ok_or(syn::Error::new(
+                Span::call_site(),
+                "No item `macro_ident` specified.",
+            ))?,
+            traits: traits.ok_or(syn::Error::new(
+                Span::call_site(),
+                "No item `trait` specified.",
+            ))?,
         })
     }
 }

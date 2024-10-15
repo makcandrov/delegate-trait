@@ -92,11 +92,17 @@ pub trait TokenModifier: Sized {
         LookupTokenModifier(self).modify_pat_type(item)
     }
 
-    fn modify_angle_bracketed_generic_argument(&mut self, item: &mut syn::AngleBracketedGenericArguments) {
+    fn modify_angle_bracketed_generic_argument(
+        &mut self,
+        item: &mut syn::AngleBracketedGenericArguments,
+    ) {
         LookupTokenModifier(self).modify_angle_bracketed_generic_argument(item)
     }
 
-    fn modify_angle_parenthesized_generic_argument(&mut self, item: &mut syn::ParenthesizedGenericArguments) {
+    fn modify_angle_parenthesized_generic_argument(
+        &mut self,
+        item: &mut syn::ParenthesizedGenericArguments,
+    ) {
         LookupTokenModifier(self).modify_angle_parenthesized_generic_argument(item)
     }
 

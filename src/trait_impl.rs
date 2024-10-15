@@ -46,17 +46,24 @@ pub fn generate_trait_impl(
 
     let mut generics_renamer = GenericsRenamer::default();
 
-    for couple in trait_input.generics.params.iter().zip(config.generics.params.iter()) {
+    for couple in trait_input
+        .generics
+        .params
+        .iter()
+        .zip(config.generics.params.iter())
+    {
         match couple {
-            (GenericParam::Lifetime(original), GenericParam::Lifetime(renamed)) => {
-                generics_renamer.insert_lifetime(original.lifetime.ident.to_string(), renamed.lifetime.ident.clone())
-            },
+            (GenericParam::Lifetime(original), GenericParam::Lifetime(renamed)) => generics_renamer
+                .insert_lifetime(
+                    original.lifetime.ident.to_string(),
+                    renamed.lifetime.ident.clone(),
+                ),
             (GenericParam::Type(original), GenericParam::Type(renamed)) => {
                 generics_renamer.insert_type(original.ident.to_string(), renamed.ident.clone())
-            },
+            }
             (GenericParam::Const(original), GenericParam::Const(renamed)) => {
                 generics_renamer.insert_type(original.ident.to_string(), renamed.ident.clone())
-            },
+            }
             _ => {
                 return Err(syn::Error::new_spanned(
                     &couple.1,
@@ -66,7 +73,7 @@ pub fn generate_trait_impl(
                         generic_param_name(&couple.1)
                     ),
                 ))
-            },
+            }
         }
     }
 
@@ -82,7 +89,10 @@ pub fn generate_trait_impl(
 
     let trait_input_items = &trait_input.items;
 
-    for method in trait_input_items.iter().filter_map(|item| trait_item_as_fn(item)) {
+    for method in trait_input_items
+        .iter()
+        .filter_map(|item| trait_item_as_fn(item))
+    {
         let mut method = method.clone();
 
         method.default = None;
@@ -110,7 +120,12 @@ pub fn generate_trait_impl(
         }
     };
 
-    Ok(config.wrap_methods(&context, &trait_path.to_token_stream(), &config.generics, &methods))
+    Ok(config.wrap_methods(
+        &context,
+        &trait_path.to_token_stream(),
+        &config.generics,
+        &methods,
+    ))
 }
 
 fn trait_item_as_fn(trait_item: &TraitItem) -> Option<&TraitItemFn> {

@@ -45,13 +45,13 @@ pub fn merge_bounds(g1: &mut GenericParam, g2: &GenericParam) {
     match (g1, g2) {
         (GenericParam::Const(_), GenericParam::Const(_)) => {
             panic!("cannot merge const");
-        },
+        }
         (GenericParam::Type(t1), GenericParam::Type(t2)) => {
             t1.bounds.extend(t2.bounds.clone());
-        },
+        }
         (GenericParam::Lifetime(l1), GenericParam::Lifetime(l2)) => {
             l1.bounds.extend(l2.bounds.clone());
-        },
+        }
         _ => panic!("generic param type mismatch"),
     }
 }
@@ -73,7 +73,11 @@ pub fn merge_generics(g1: &mut Generics, g2: &Generics) {
     }
 }
 
-pub fn merge_where_clauses(w1: &mut Option<WhereClause>, w2: &Option<WhereClause>, keep_where_token: bool) {
+pub fn merge_where_clauses(
+    w1: &mut Option<WhereClause>,
+    w2: &Option<WhereClause>,
+    keep_where_token: bool,
+) {
     let Some(w2) = w2 else {
         return;
     };

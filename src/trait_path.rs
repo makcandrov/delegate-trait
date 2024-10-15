@@ -4,20 +4,8 @@ use quote::{ToTokens, TokenStreamExt};
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 use syn::{
-    braced,
-    bracketed,
-    parse2,
-    token,
-    AttrStyle,
-    Attribute,
-    Generics,
-    ImplRestriction,
-    Path,
-    PathArguments,
-    Token,
-    TraitItem,
-    TypeParamBound,
-    Visibility,
+    braced, bracketed, parse2, token, AttrStyle, Attribute, Generics, ImplRestriction, Path,
+    PathArguments, Token, TraitItem, TypeParamBound, Visibility,
 };
 
 pub struct ItemTraitPath {
@@ -143,7 +131,10 @@ impl ToTokens for ItemTraitPath {
         self.path.to_tokens(tokens);
         self.generics.to_tokens(tokens);
         if !self.supertraits.is_empty() {
-            self.colon_token.clone().unwrap_or_default().to_tokens(tokens);
+            self.colon_token
+                .clone()
+                .unwrap_or_default()
+                .to_tokens(tokens);
             self.supertraits.to_tokens(tokens);
         }
         self.generics.where_clause.to_tokens(tokens);

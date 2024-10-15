@@ -15,7 +15,8 @@ macro_rules! build_delegate {
             let out_path = ::std::path::Path::new(&out_dir);
 
             let input = $crate::builds::generate_delegate_build_string("./INPUT");
-            ::std::fs::write(out_path.join("lib.rs"), input).expect("Could not write expanded macro.");
+            ::std::fs::write(out_path.join("lib.rs"), input)
+                .expect("Could not write expanded macro.");
         }
     };
 }
@@ -31,7 +32,8 @@ macro_rules! build_delegate_impl {
             let out_path = ::std::path::Path::new(&out_dir);
 
             let input = $crate::builds::generate_delegate_impl_build_string("../INPUT");
-            ::std::fs::write(out_path.join("lib.rs"), input).expect("Could not write expanded macro.");
+            ::std::fs::write(out_path.join("lib.rs"), input)
+                .expect("Could not write expanded macro.");
         }
     };
 }
