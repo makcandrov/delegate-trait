@@ -1,22 +1,9 @@
-pub mod builds;
+#![cfg_attr(not(test), warn(unused_crate_dependencies))]
+#![doc = include_str!("../README.md")]
 
-mod config;
-pub use config::TraitConfig;
+pub use delegate_trait_impl::{delegate_trait, delegate_trait_impl};
 
-mod context;
-pub use context::Context;
-
-mod modifier;
-
-mod generics;
-pub use generics::GenericIdent;
-
-mod input;
-pub use input::parse_input;
-
-mod trait_path;
-pub use trait_path::ItemTraitPath;
-
-mod trait_impl;
-pub use delegate::delegate;
-pub use trait_impl::{generate_trait_impl, generate_traits_match};
+#[doc(hidden)]
+pub mod __private {
+    pub use delegate::delegate;
+}

@@ -1,11 +1,20 @@
 [package]
 name = "delegate-trait"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
+repository = "https://github.com/makcandrov/delegate-trait"
+homepage = "https://github.com/makcandrov/delegate-trait"
+documentation = "https://docs.rs/delegate-trait"
+description = "Auto generate Rust procedural macro to delegate traits implementations."
+license = "MIT OR Apache-2.0"
+keywords = ["delegate", "trait"]
 
 [dependencies]
-syn = { version = "2", features = ["full"] }
-quote = "1"
-proc-macro2 = "1"
 delegate = "0.13"
-prettyplease = "0.2"
+delegate-trait-impl.path = "impl"
+
+[workspace]
+members = ["impl"]
+
+[features]
+local-imports = ["delegate-trait-impl/local-imports"]

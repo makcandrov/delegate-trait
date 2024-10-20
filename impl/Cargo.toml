@@ -1,0 +1,18 @@
+[package]
+name = "delegate-trait-impl"
+version = "0.2.0"
+edition = "2021"
+description = "`delegate-trait` implementation."
+license = "MIT OR Apache-2.0"
+keywords = ["delegate", "trait"]
+
+[dependencies]
+syn = { version = "2", features = ["full"] }
+quote = "1"
+proc-macro2 = "1"
+
+[lib]
+proc-macro = true
+
+[features]
+local-imports = []
