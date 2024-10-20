@@ -8,7 +8,10 @@ mod delegated_trait;
 use delegated_trait::DelegatedTrait;
 
 mod input;
-use input::{DelegateTraitImplInput, DelegatedTraitInput};
+use input::DelegateTraitImplInput;
+
+mod merges;
+pub use merges::merge_methods;
 
 mod source;
 use source::DelegatedTraitSource;
@@ -22,13 +25,25 @@ pub fn expand(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 }
 
 fn try_expand(input: DelegateTraitImplInput) -> syn::Result<proc_macro2::TokenStream> {
+    let crate_ident = input.crate_ident.clone();
     let traits = input.into_delegated_traits()?;
-    let traits_match = quote! {};
+    let mut traits_match = quote! {};
 
+    for tr in traits {
+        traits_match.extend(tr.generate_match_branch(crate_ident.clone()));
+    }
+
+    // Methods used for merging generics, where clauses, etc.
     let attributes = generate_attributes();
+
+    // Module containing the proc macro attribute structure.
+    let merge_methods = merge_methods();
+
     let hashtag = quote! { # };
 
     let result = quote! {
+        #merge_methods
+
         #attributes
 
         use attribute::DelegateAttribute;
@@ -51,7 +66,7 @@ fn try_expand(input: DelegateTraitImplInput) -> syn::Result<proc_macro2::TokenSt
             }
         }
 
-        fn try_expand(attribute: DelegateAttribute, input: &::syn::DeriveInput) -> ::syn::Result<::proc_macro2::TokenStream> {
+        fn try_expand(attribute: DelegateAttribute, derive_input: &::syn::DeriveInput) -> ::syn::Result<::proc_macro2::TokenStream> {
             let Some(last_segment) = attribute.path.segments.last() else {
                 return Err(syn::Error::new_spanned(&attribute.path, "ident expected"));
             };
@@ -63,7 +78,7 @@ fn try_expand(input: DelegateTraitImplInput) -> syn::Result<proc_macro2::TokenSt
                 _ => return ::syn::Result::Err(::syn::Error::new_spanned(trait_ident, &format!("Unknown trait {}.", trait_ident_string))),
             };
 
-            Ok(quote::quote!{})
+            Ok(trait_implem)
         }
     };
 

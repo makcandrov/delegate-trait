@@ -20,10 +20,7 @@ fn try_expand(input: DelegateTraitInput) -> syn::Result<proc_macro2::TokenStream
 
     #[cfg(feature = "local-imports")]
     let reexports = quote! {
-        #[doc(hidden)]
-        pub mod __private {
-            // todo
-        }
+        // todo
     };
 
     #[cfg(not(feature = "local-imports"))]
@@ -32,6 +29,10 @@ fn try_expand(input: DelegateTraitInput) -> syn::Result<proc_macro2::TokenStream
     let res = quote::quote! {
         pub use #crate_impl_ident:: delegate_trait as #macro_ident;
 
+        #[doc(hidden)]
+        pub mod __private {
+            pub use ::delegate_trait::__private::delegate;
+        }
         #reexports
     };
 
