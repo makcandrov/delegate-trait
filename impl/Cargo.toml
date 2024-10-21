@@ -7,7 +7,7 @@ license = "MIT OR Apache-2.0"
 keywords = ["delegate", "trait"]
 
 [dependencies]
-syn = { version = "2", features = ["full", "visit"] }
+syn = { version = "2", features = ["full", "visit-mut"] }
 quote = "1"
 proc-macro2 = "1"
 

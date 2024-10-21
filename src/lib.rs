@@ -5,5 +5,8 @@ pub use ::delegate_trait_impl::{delegate_trait, delegate_trait_impl};
 
 #[doc(hidden)]
 pub mod __private {
-    pub use ::delegate::delegate;
+    pub use ::delegate;
+    pub use ::proc_macro2;
+    pub use ::quote;
+    pub use ::syn;
 }

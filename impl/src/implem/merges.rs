@@ -3,8 +3,8 @@ use quote::quote;
 pub fn merge_methods() -> proc_macro2::TokenStream {
     quote! {
         fn merge_where_clauses(
-            w1: &mut Option<::syn::WhereClause>,
-            w2: Option<&::syn::WhereClause>,
+            w1: &mut Option<syn::WhereClause>,
+            w2: Option<&syn::WhereClause>,
             keep_where_token: bool,
         ) {
             let Some(w2) = w2 else {
@@ -23,7 +23,7 @@ pub fn merge_methods() -> proc_macro2::TokenStream {
             }
         }
 
-        fn merge_generics(g1: &mut ::syn::Generics, g2: &::syn::Generics) {
+        fn merge_generics(g1: &mut syn::Generics, g2: &syn::Generics) {
             let mut i = 0;
 
             // 1. g1's lifetimes.

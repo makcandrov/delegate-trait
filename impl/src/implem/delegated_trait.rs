@@ -53,12 +53,11 @@ impl DelegatedTrait {
 
             let trait_generics = &attribute.generics;
 
-            ::quote::quote! {
+            quote::quote! {
                 impl #hashtag impl_generics #trait_path #hashtag trait_generics for #hashtag name #hashtag ty_generics #hashtag wh {
                     #hashtag wi
 
-                    // todo: change
-                    :: #crate_ident ::__private::delegate! {
+                    :: #crate_ident :: __private :: delegate::delegate! {
                         to #hashtag to {
                             #methods
                         }

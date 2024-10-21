@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use syn::{
     punctuated::Punctuated,
+    token::PathSep,
     visit_mut::{self, VisitMut},
     ItemTrait, Path, PathArguments, PathSegment,
 };
@@ -18,8 +19,8 @@ impl TraitsVisitor {
     pub fn new() -> Self {
         Self {
             imports: HashMap::new(),
-            current_mod_path: empty_path(),
-            current_use_path: empty_path(),
+            current_mod_path: empty_path(None),
+            current_use_path: empty_path(None),
             traits: HashMap::new(),
             inside_trait: false,
         }
@@ -82,9 +83,9 @@ impl VisitMut for TraitsVisitor {
     }
 
     fn visit_item_use_mut(&mut self, i: &mut syn::ItemUse) {
-        self.current_use_path = empty_path();
+        self.current_use_path = empty_path(i.leading_colon);
         visit_mut::visit_item_use_mut(self, i);
-        self.current_use_path = empty_path();
+        self.current_use_path = empty_path(None);
     }
 
     fn visit_use_path_mut(&mut self, i: &mut syn::UsePath) {
@@ -121,10 +122,10 @@ pub fn ident_to_path_segment(ident: syn::Ident) -> PathSegment {
     }
 }
 
-pub fn empty_path() -> Path {
+pub fn empty_path(leading_colon: Option<PathSep>) -> Path {
     let segments = Punctuated::new();
     Path {
-        leading_colon: None,
+        leading_colon,
         segments,
     }
 }

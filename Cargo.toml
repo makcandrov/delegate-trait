@@ -10,8 +10,12 @@ license = "MIT OR Apache-2.0"
 keywords = ["delegate", "trait"]
 
 [dependencies]
-delegate = "0.13"
 delegate-trait-impl.path = "impl"
+
+delegate = "0.13"
+proc-macro2 = "1"
+quote = "1"
+syn = "2"
 
 [workspace]
 members = ["impl"]

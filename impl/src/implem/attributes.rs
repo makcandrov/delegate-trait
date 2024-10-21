@@ -4,22 +4,25 @@ use quote::quote;
 pub fn generate_attributes() -> TokenStream {
     quote! {
         mod attribute {
-            use ::syn::parse::Parse;
-            use ::quote::ToTokens;
+            use super::{proc_macro2, quote, syn};
+
+            use syn::parse::Parse;
+            use quote::ToTokens;
 
             mod kw {
-                ::syn::custom_keyword!(to);
-                ::syn::custom_keyword!(with);
+                use super::syn;
+                syn::custom_keyword!(to);
+                syn::custom_keyword!(with);
             }
 
             #[derive(Clone)]
             pub struct DelegateAttribute {
-                pub fo: ::syn::Generics,
-                pub path: ::syn::Path,
-                pub generics: ::syn::Generics,
+                pub fo: syn::Generics,
+                pub path: syn::Path,
+                pub generics: syn::Generics,
                 pub to: syn::Expr,
-                pub wh: Option<::syn::WhereClause>,
-                pub wi: Option<::proc_macro2::TokenStream>,
+                pub wh: Option<syn::WhereClause>,
+                pub wi: Option<proc_macro2::TokenStream>,
             }
 
             impl Parse for DelegateAttribute {
@@ -30,7 +33,7 @@ pub fn generate_attributes() -> TokenStream {
                         syn::Generics::default()
                     };
 
-                    let mut path = input.parse::<::syn::Path>()?;
+                    let mut path = input.parse::<syn::Path>()?;
 
                     let arguments = core::mem::replace(
                         &mut path
@@ -38,17 +41,17 @@ pub fn generate_attributes() -> TokenStream {
                             .last_mut()
                             .expect("TraitConfig::parse: Ident expected")
                             .arguments,
-                        ::syn::PathArguments::None,
+                       syn::PathArguments::None,
                     );
 
-                    let generics = ::syn::parse2::<::syn::Generics>(arguments.to_token_stream())?;
+                    let generics = syn::parse2::<syn::Generics>(arguments.to_token_stream())?;
 
                     input.parse::<kw::to>()?;
 
                     let to = syn::Expr::parse_without_eager_brace(input)?;
 
-                    let wh = if input.peek(::syn::Token![where]) {
-                        Some(input.parse::<::syn::WhereClause>().unwrap())
+                    let wh = if input.peek(syn::Token![where]) {
+                        Some(input.parse::<syn::WhereClause>().unwrap())
                     } else {
                         None
                     };
@@ -56,8 +59,8 @@ pub fn generate_attributes() -> TokenStream {
                     let wi = if input.peek(kw::with) {
                         input.parse::<kw::with>().unwrap();
                         let content;
-                        ::syn::braced!(content in input);
-                        Some(content.parse::<::proc_macro2::TokenStream>()?)
+                       syn::braced!(content in input);
+                        Some(content.parse::<proc_macro2::TokenStream>()?)
                     } else {
                         None
                     };

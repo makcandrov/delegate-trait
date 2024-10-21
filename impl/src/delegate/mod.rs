@@ -32,6 +32,9 @@ fn try_expand(input: DelegateTraitInput) -> syn::Result<proc_macro2::TokenStream
         #[doc(hidden)]
         pub mod __private {
             pub use ::delegate_trait::__private::delegate;
+            pub use ::delegate_trait::__private::proc_macro2;
+            pub use ::delegate_trait::__private::quote;
+            pub use ::delegate_trait::__private::syn;
         }
         #reexports
     };
